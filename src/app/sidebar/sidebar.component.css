@@ -1,0 +1,38 @@
+.sidebar {
+    width: 250px; /* Ajusta según el diseño */
+    background-color: #f4f4f4; /* Color de fondo */
+    padding: 20px; /* Espaciado interior */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sombra */
+    position: fixed; /* Fija a la izquierda */
+    height: 100%; /* Altura completa */
+  }
+  
+  .sidebar-title {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+  }
+  
+  .sidebar-menu {
+    list-style: none; /* Sin viñetas */
+    padding: 0; /* Sin padding */
+  }
+  
+  .sidebar-menu li {
+    margin: 10px 0; /* Espacio entre elementos */
+  }
+  
+  .sidebar-menu a {
+    text-decoration: none; /* Sin subrayado */
+    color: #333; /* Color del texto */
+    font-size: 1.1em;
+    transition: color 0.3s; /* Transición suave */
+  }
+  
+  .sidebar-menu a:hover {
+    color: #007bff; /* Color al pasar el mouse */
+  }
+  
+  .active {
+    font-weight: bold; /* Resaltar la pestaña activa */
+  }
+  

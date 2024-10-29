@@ -1,1 +1,54 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+    color-scheme: light dark;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Distribuye los elementos con espacio entre ellos */
+    padding: 10px 20px; /* Espaciado interno */
+    background-color: gray; /* Color de fondo */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra */
+}
+
+.app-name h1 {
+    font-size: 1.5rem; /* Tamaño de fuente */
+    margin: 0; /* Elimina márgenes */
+}
+
+.navigation ul {
+    list-style: none; /* Elimina puntos de la lista */
+    margin: 0; /* Elimina márgenes */
+    padding: 0; /* Elimina padding */
+    display: flex; /* Hace que la lista se muestre en fila */
+}
+
+.navigation li {
+    margin: 0 15px; /* Espaciado entre los elementos de la lista */
+}
+
+.navigation a {
+    text-decoration: none; /* Elimina subrayado de los enlaces */
+    color: #ffffff; /* Color del enlace */
+    font-weight: bold; /* Negrita */
+}
+
+.search {
+    display: flex; /* Flex para alinear input y botón */
+    align-items: center;
+}
+
+.search input {
+    padding: 5px; /* Espaciado interno */
+    margin-right: 5px; /* Espacio entre el input y el botón */
+}
+
+.user-profile {
+    margin-left: 20px; /* Espacio a la izquierda */
+}
+
+.user-profile a {
+    text-decoration: none; /* Elimina subrayado de los enlaces */
+    color: #ffffff; /* Color del enlace */
+}
