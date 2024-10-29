@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CustomersService } from './services/customers/customers.service';
+import { CustomersService, Customer } from './services/customers/customers.service'; // Importa Customer
 import { HeaderComponent } from './header/header.component';
 
 @Component({
@@ -12,8 +12,9 @@ import { HeaderComponent } from './header/header.component';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   customerForm!: FormGroup;
+  customers: Customer[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -26,24 +27,26 @@ export class AppComponent {
       email: ['', [Validators.required, Validators.email]],
       address: ['', Validators.required]
     });
+
+    this.loadCustomers();
   }
 
-  guardarCustomers(): void {
-    if (this.customerForm.valid) {
-        const customerData = this.customerForm.value;
-        console.log('Datos del cliente:', customerData); // Agrega este log
-        this.customersService.createCustomer(customerData).subscribe(
-            response => {
-                console.log('Cliente creado exitosamente:', response);
-                this.customerForm.reset();
-            },
-            error => {
-                console.error('Error al crear el cliente:', error);
-            }
-        );
-    } else {
-        console.log('Formulario no válido');
-    }
-}
+  loadCustomers() {
+    this.customersService.getCustomers().subscribe(
+      (data: Customer[]) => this.customers = data,
+      error => console.error('Error al cargar clientes', error)
+    );
+  }
 
+  guardarCustomers() {
+    if (this.customerForm.valid) {
+      this.customersService.createCustomer(this.customerForm.value).subscribe(
+        (newCustomer: Customer) => {
+          this.customers.push(newCustomer);
+          this.customerForm.reset();
+        },
+        error => console.error('Error al crear cliente', error)
+      );
+    }
+  }
 }

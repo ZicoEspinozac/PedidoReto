@@ -1,28 +1,100 @@
+// src/app/services/orders/orders.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
+// Interfaz para representar la estructura de una orden
+export interface Order {
+  id: string; // ID de la orden
+  customerId: string; // ID del cliente
+  customer: string; // Nombre del cliente
+  price: number; // Precio total de la orden
+  quantity: number; // Cantidad total de productos en la orden
+  status: string; // Estado de la orden
+  items: Array<{
+    productId: string; // ID del producto
+    productName: string; // Nombre del producto
+    price: number; // Precio del producto
+    quantity: number; // Cantidad de ese producto en la orden
+  }>; // Arreglo que contiene información sobre los productos
+}
+
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrdersService {
-  private apiUrl = 'http://localhost:8080/api/orders'; // Cambia esto por la URL de tu API
+  private apiUrl = 'http://localhost:8080/api/orders'; // Cambia esto por la URL de tu API de órdenes
+  private productsUrl = 'http://localhost:8080/api/products'; // Cambia esto por la URL de tu API de productos
+  private customersUrl = 'http://localhost:8080/api/customers'; // Cambia esto por la URL de tu API de clientes
 
   constructor(private http: HttpClient) {}
 
-  getOrders(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl); // Llama a la API para obtener la lista de órdenes
+  // Obtener todas las órdenes
+  getOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(this.apiUrl).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  createOrder(orderData: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, orderData); // Llama a la API para crear una nueva orden
+  // Crear una nueva orden
+  createOrder(orderData: Order): Observable<Order> {
+    return this.http.post<Order>(this.apiUrl, orderData).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  updateOrder(id: number, orderData: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, orderData); // Llama a la API para actualizar una orden
+  // Actualizar una orden existente
+  updateOrder(id: string, orderData: Order): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${id}`, orderData).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  deleteOrder(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`); // Llama a la API para eliminar una orden
+  // Eliminar una orden por ID
+  deleteOrder(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // Obtener todos los productos
+  getProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(this.productsUrl).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // Obtener todos los clientes
+  getCustomers(): Observable<Customer[]> {
+    return this.http.get<Customer[]>(this.customersUrl).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // Manejo de errores
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'Ocurrió un error desconocido';
+    if (error.error instanceof ErrorEvent) {
+      // Error del cliente
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Error del servidor
+      errorMessage = `Código de error: ${error.status}\nMensaje: ${error.message}`;
+    }
+    return throwError(errorMessage);
   }
 }

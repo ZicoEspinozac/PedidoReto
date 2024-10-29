@@ -2,27 +2,43 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface Product {
+  id: string; // Asegúrate de que este tipo coincida con tu modelo en el backend
+  name: string;
+  price: number;
+  stock: number;
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProductsService {
-  private apiUrl = 'http://localhost:8080/api/products'; // Cambia esto por la URL de tu API
+  private apiUrl = 'http://localhost:8080/api/products'; // Cambia esta URL según tu API
 
   constructor(private http: HttpClient) {}
 
-  getProducts(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl); // Llama a la API para obtener la lista de productos
+  // Método para obtener todos los productos
+  getProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(this.apiUrl);
   }
 
-  createProduct(productData: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, productData); // Llama a la API para crear un nuevo producto
+  // Método para obtener un producto por ID
+  getProductById(id: string): Observable<Product> {
+    return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
 
-  updateProduct(id: number, productData: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, productData); // Llama a la API para actualizar un producto
+  // Método para crear un nuevo producto
+  createProduct(product: Product): Observable<Product> {
+    return this.http.post<Product>(this.apiUrl, product);
   }
 
-  deleteProduct(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`); // Llama a la API para eliminar un producto
+  // Método para actualizar un producto
+  updateProduct(id: string, product: Product): Observable<Product> {
+    return this.http.put<Product>(`${this.apiUrl}/${id}`, product);
+  }
+
+  // Método para eliminar un producto
+  deleteProduct(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

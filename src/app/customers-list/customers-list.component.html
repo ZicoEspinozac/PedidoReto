@@ -1,5 +1,23 @@
-<h2>Lista de Clientes</h2>
-<table>
+<div class="container">
+  <div class="form-container">
+    <h2>Crear Cliente</h2>
+    <form [formGroup]="customerForm" (ngSubmit)="guardarCustomers()">
+      <div>
+        <label for="name">Nombre:</label>
+        <input id="name" formControlName="name" type="text" />
+      </div>
+      <div>
+        <label for="email">Email:</label>
+        <input id="email" formControlName="email" type="email" />
+      </div>
+      <div>
+        <label for="address">Dirección:</label>
+        <input id="address" formControlName="address" type="text" />
+      </div>
+      <button type="submit">Crear Cliente</button>
+    </form>
+</div>
+<table class="table">
   <thead>
     <tr>
       <th>Nombre</th>
@@ -8,10 +26,10 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let customer of customers">
-      <td>{{ customer.name }}</td>
-      <td>{{ customer.email }}</td>
-      <td>{{ customer.address }}</td>
+    <tr *ngFor="let item of customers">
+      <td>{{item.name}}</td>
+      <td>{{item.email}}</td>
+      <td>{{item.address}}</td>
     </tr>
   </tbody>
 </table>

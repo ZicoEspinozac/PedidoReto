@@ -1,23 +1,7 @@
 <app-header></app-header>
 <div class="container">
 
-    <div class="form-container">
-        <h2>Crear Cliente</h2>
-        <form [formGroup]="customerForm" (ngSubmit)="guardarCustomers()">
-            <div>
-                <label for="name">Nombre:</label>
-                <input id="name" formControlName="name" type="text" />
-            </div>
-            <div>
-                <label for="email">Email:</label>
-                <input id="email" formControlName="email" type="email" />
-            </div>
-            <div>
-                <label for="address">Dirección:</label>
-                <input id="address" formControlName="address" type="text" />
-            </div>
-            <button type="submit">Crear Cliente</button>
-        </form>
-    </div>
-</div>
+    <router-outlet></router-outlet>
+ <!-- Este es el lugar donde se cargan los componentes según la ruta -->
+
  <!-- Esto es para la navegación -->
