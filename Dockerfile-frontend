@@ -1,0 +1,26 @@
+# Usar una imagen base de Node.js
+FROM node:14 AS build
+
+# Definir el directorio de trabajo
+WORKDIR /app
+
+# Copiar package.json y package-lock.json
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar el resto del código fuente
+COPY . .
+
+# Construir la aplicación
+RUN npm run build
+
+# Usar una imagen base de Nginx para servir la aplicación
+FROM nginx:alpine
+
+# Copiar archivos de construcción a la carpeta de Nginx
+COPY --from=build /app/dist/mi-angular-app /usr/share/nginx/html
+
+# Exponer el puerto en el que Nginx escucha
+EXPOSE 80
