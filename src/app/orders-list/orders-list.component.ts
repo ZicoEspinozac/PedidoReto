@@ -11,16 +11,18 @@ import { Product, ProductsService } from '../services/products/products.service'
   templateUrl: './orders-list.component.html',
   styleUrls: ['./orders-list.component.css'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule] // Añadir CommonModule y ReactiveFormsModule a los imports
+  imports: [CommonModule, ReactiveFormsModule]
 })
 export class OrdersListComponent implements OnInit {
+
   orderForm: FormGroup;
   orders: Order[] = [];
   customers: Customer[] = [];
   products: Product[] = [];
-  
-  // Define los estados de la orden
+  showOrderForm: boolean = false;
+  selectedOrder: Order | null = null; // Para mostrar detalles de la orden seleccionada
   orderStatuses: string[] = ['NEW', 'PROCESSING', 'COMPLETED'];
+  searchQuery: string = ''; // Variable para búsqueda
 
   constructor(
     private fb: FormBuilder,
@@ -29,10 +31,10 @@ export class OrdersListComponent implements OnInit {
     private productsService: ProductsService
   ) {
     this.orderForm = this.fb.group({
-      customerId: ['', Validators.required],
+      customer: ['', Validators.required],
       productId: ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      status: ['', Validators.required] // Añadido el control para el estado
+      quantity: [1, [Validators.required, Validators.min(1)]], // Mínimo 1
+      status: ['', Validators.required]
     });
   }
 
@@ -44,16 +46,15 @@ export class OrdersListComponent implements OnInit {
 
   private loadOrders() {
     this.ordersService.getOrders().subscribe({
-  next: (orders) => {
-    console.log('Órdenes cargadas:', orders); // Para verificar la estructura de datos
-    this.orders = orders;
-  },
-  error: (error) => {
-    console.error('Error al cargar órdenes', error);
+      next: (orders) => {
+        console.log('Órdenes cargadas:', orders);
+        this.orders = orders;
+      },
+      error: (error) => {
+        console.error('Error al cargar órdenes', error);
+      }
+    });
   }
-});
-  }
-  
 
   private loadCustomers() {
     this.customersService.getCustomers().subscribe({
@@ -77,46 +78,121 @@ export class OrdersListComponent implements OnInit {
     });
   }
 
-  saveOrder() {
-    if (this.orderForm.invalid) {
+  editOrderData(orderId: string | undefined) {
+    if (!orderId) {
+        console.error('ID de orden no proporcionado.');
+        return;
+    }
+
+    console.log('ID de orden a editar:', orderId); // Línea de log para verificar el ID de orden
+
+    this.ordersService.getOrderById(orderId).subscribe({
+        next: (order) => {
+            console.log('Datos de la orden a editar:', order); // Línea de log para verificar los datos de la orden
+
+            // Cargar los datos de la orden en el formulario
+            this.orderForm.patchValue({
+              customer: order.customerId, // Esto sigue siendo el ID
+              productId: order.products[0].id,
+              quantity: order.quantity,
+              status: order.status
+          });
+            this.selectedOrder = order; // Almacenar la orden seleccionada para futuras referencias
+            this.showOrderForm = true; // Mostrar el formulario de edición
+        },
+        error: (error) => {
+            console.error('Error al cargar los datos de la orden', error);
+        }
+    });
+}
+
+public saveOrder() {
+  if (this.orderForm.invalid) {
       console.error('Formulario inválido');
       return;
-    }
+  }
 
-    const { customerId, productId, quantity, status } = this.orderForm.value;
+  // Extraer los valores del formulario
+  const { customer, productId, quantity, status } = this.orderForm.value;
 
-    const selectedCustomer = this.customers.find(customer => customer.id === customerId);
-    const selectedProduct = this.products.find(product => product.id === productId);
+  // Buscar el cliente y el producto seleccionados en sus respectivas listas
+  const selectedCustomer = this.customers.find(c => c.id === customer);
+  const selectedProduct = this.products.find(p => p.id === productId);
 
-    if (!selectedCustomer || !selectedProduct) {
+  if (!selectedCustomer || !selectedProduct) {
       console.error('Producto o cliente no encontrado');
       return;
-    }
+  }
 
-    const newOrder: Order = {
-      id: '', // Asume que el backend genera el ID
-      customerId: selectedCustomer.id,
-      customer: selectedCustomer.name,
-      price: selectedProduct.price * quantity,
-      quantity: quantity,
-      status: status,
-      items: [{
-        productId: selectedProduct.id,
-        productName: selectedProduct.name,
-        price: selectedProduct.price,
-        quantity: quantity
-      }]
-    };
+  // Calcular el precio total
+  const totalPrice = selectedProduct.price * quantity;
 
-    this.ordersService.createOrder(newOrder).subscribe({
+  // Crear el objeto de nueva orden sin 'id', porque será generado en el backend
+  const newOrder: Omit<Order, 'id'> = {
+    customerId: selectedCustomer.id,
+    customer: selectedCustomer.name,
+    price: totalPrice,
+    quantity: quantity, // Aquí también se usa quantity
+    status: status,
+    products: [{
+      id: selectedProduct.id,
+      name: selectedProduct.name,
+      price: selectedProduct.price,
+      stock: quantity // Usa quantity aquí si corresponde
+    }]
+  };
+
+  console.log('Datos de la orden:', newOrder);
+
+  // Llamada al servicio para crear la orden
+  this.ordersService.createOrder(newOrder).subscribe({
       next: (order) => {
-        console.log('Orden creada', order);
-        this.loadOrders(); // Recargar las órdenes después de crear una nueva
-        this.orderForm.reset(); // Limpiar el formulario
+          console.log('Orden creada', order);
+          this.loadOrders();
+          this.orderForm.reset();
+          this.showOrderForm = false;
       },
       error: (error) => {
-        console.error('Error al crear la orden', error);
+          console.error('Error al crear la orden', error);
       }
-    });
+  });
+}
+
+  public deleteOrder(id?: string) {
+    if (id) {
+      this.ordersService.deleteOrder(id).subscribe({
+        next: () => {
+          console.log('Orden eliminada', id);
+          this.loadOrders(); // Recargar las órdenes después de eliminar
+        },
+        error: (error) => {
+          console.error('Error al eliminar la orden', error);
+        }
+      });
+    } else {
+      console.error('ID de la orden es undefined');
+    }
+  }
+
+  toggleOrderFormVisibility() {
+    this.showOrderForm = !this.showOrderForm;
+  }
+
+  // Método para filtrar las órdenes
+  get filteredOrders() {
+    console.log("imprimiendo orders", this.orders);
+    return this.orders.filter(order => 
+      order.customer.toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+  }
+
+  // Método para abrir los detalles de la orden
+  public openOrderDetails(order: Order): void {
+    this.selectedOrder = order;
+  }
+
+  // Método para cerrar los detalles de la orden
+  public closeOrderDetails(): void {
+    this.selectedOrder = null;
   }
 }

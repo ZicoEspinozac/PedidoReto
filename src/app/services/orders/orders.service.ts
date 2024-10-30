@@ -6,17 +6,17 @@ import { catchError } from 'rxjs/operators';
 
 // Interfaz para representar la estructura de una orden
 export interface Order {
-  id: string; // ID de la orden
+  id?: string;
   customerId: string; // ID del cliente
   customer: string; // Nombre del cliente
   price: number; // Precio total de la orden
   quantity: number; // Cantidad total de productos en la orden
   status: string; // Estado de la orden
-  items: Array<{
-    productId: string; // ID del producto
-    productName: string; // Nombre del producto
+  products: Array<{
+    id: string; // ID del producto
+    name: string; // Nombre del producto
     price: number; // Precio del producto
-    quantity: number; // Cantidad de ese producto en la orden
+    stock: number; // Cantidad de ese producto en la orden
   }>; // Arreglo que contiene información sobre los productos
 }
 
@@ -25,6 +25,7 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  stock: number;
 }
 
 export interface Customer {
@@ -97,4 +98,12 @@ export class OrdersService {
     }
     return throwError(errorMessage);
   }
+
+  // En orders.service.ts
+  getOrderById(orderId: string): Observable<Order> {
+    return this.http.get<Order>(`${this.apiUrl}/${orderId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
 }

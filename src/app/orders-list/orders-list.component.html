@@ -1,29 +1,90 @@
-<table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nombre del Cliente</th>
-        <th>Productos</th>
-        <th>Cantidad Total</th>
-        <th>Precio Total</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let order of orders">
-        <td>{{ order.id }}</td>
-        <td>{{ order.customer}}</td>
-        <td>
-          <ul>
-            <li *ngFor="let item of order.items">
-              {{ item.productName }} - Cantidad: {{ item.quantity }} - Precio: {{ item.price }}
-            </li>
-          </ul>
-        </td>
-        <td>{{ order.quantity }}</td>
-        <td>{{ order.price }}</td>
-        <td>{{ order.status }}</td>
-      </tr>
-    </tbody>
-  </table>
-  
+<!-- order-list.component.html -->
+<head>
+    <title>Mi Biblioteca</title>
+</head>
+<body>
+    <header>
+        <h1>Órdenes</h1>
+        <button class="create-button" (click)="toggleOrderFormVisibility()">Crear Nueva</button>
+    </header>
+    <main>
+        <div class="form-container" *ngIf="showOrderForm">
+            <form [formGroup]="orderForm" (ngSubmit)="saveOrder()">
+                <label for="customerId">Cliente:</label>
+                <select id="customerId" formControlName="customer" class="form-select">
+                    <option *ngFor="let customer of customers" [ngValue]="customer.id">{{ customer.name }}</option>
+                </select>
+                
+                <label for="productId">Producto:</label>
+                <select id="productId" formControlName="productId" class="form-select">
+                    <option *ngFor="let product of products" [ngValue]="product.id">{{ product.name }}</option>
+                </select>
+                
+                <label for="quantity">Cantidad:</label>
+                <input type="number" id="quantity" formControlName="quantity" min="1" class="form-input" />
+
+                <label for="status">Estado:</label>
+                <select id="status" formControlName="status" class="form-select">
+                    <option *ngFor="let status of orderStatuses" [ngValue]="status">{{ status }}</option>
+                </select>
+
+                <button type="submit" class="save-button">Guardar Orden</button>
+                <button type="button" class="cancel-button" (click)="showOrderForm = false">Cancelar</button>
+            </form>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Nombre del Cliente</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let order of filteredOrders">
+                    <td>
+                        <ul>
+                            <li class="view-link" (click)="openOrderDetails(order)">View</li>
+                        </ul>
+                    </td>
+                    <td>{{ order.customer }}</td> <!-- Cambia esto para mostrar el nombre del cliente -->
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.price }}</td>
+                    <td>
+                        <button (click)="deleteOrder(order.id)" class="delete-button">Borrar</button>
+                    </td>
+                    <td>
+                        <button (click)="editOrderData(order.id)">Editar</button> <!-- Pasar la orden completa -->
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            <a href="#">Anterior</a>
+            <a href="#">1</a>
+            <a href="#">Siguiente</a>
+        </div>
+
+        <!-- Modal para mostrar detalles de la orden -->
+        <div class="modal" *ngIf="selectedOrder" (click)="closeOrderDetails()">
+            <div class="modal-content" (click)="$event.stopPropagation()">
+                <span class="close" (click)="closeOrderDetails()">&times;</span>
+                <h2>Detalles de la Orden</h2>
+                <p><strong>Cliente:</strong> {{ selectedOrder.customer }}</p> <!-- Mostrar el nombre del cliente -->
+                <p><strong>Estado:</strong> {{ selectedOrder.status }}</p>
+                <p><strong>Total:</strong> {{ selectedOrder.price }}</p>
+                <p><strong>Cantidad:</strong> {{ selectedOrder.quantity }}</p>
+                <p><strong>Productos:</strong></p>
+                <ul>
+                    <li *ngFor="let product of selectedOrder.products">
+                        {{ product.name }} - Cantidad: {{ product.stock }} - Precio: {{ product.price }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
