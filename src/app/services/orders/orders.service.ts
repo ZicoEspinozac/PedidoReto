@@ -17,7 +17,8 @@ export interface Order {
     name: string; // Nombre del producto
     price: number; // Precio del producto
     stock: number; // Cantidad de ese producto en la orden
-  }>; // Arreglo que contiene información sobre los productos
+  }>;
+  totalPrice?: number; // Arreglo que contiene información sobre los productos
 }
 
 

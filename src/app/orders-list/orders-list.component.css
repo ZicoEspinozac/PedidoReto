@@ -127,39 +127,59 @@ ul {
     text-decoration: underline;
 }
 
-/* Estilos para el modal */
-.modal {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed; /* Fijo para cubrir toda la pantalla */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
-    z-index: 1000; /* Asegura que esté encima de otros elementos */
-}
-
-.modal-content {
-    background-color: white; /* Fondo blanco */
-    color: black; /* Texto negro */
+/* Estilos para los detalles de la orden */
+.order-details {
+    background-color: #333;
     padding: 20px;
-    border-radius: 10px;
+    border: 1px solid #ccc;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 20px 0;
+    border-radius: 10px;
 }
 
-.close {
-    color: black; /* Color del botón de cerrar */
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+.order-details h2 {
+    margin-top: 0;
+}
+
+.order-details p {
+    margin: 5px 0;
+}
+
+.order-details ul {
+    padding-left: 20px;
+}
+
+.order-details li {
+    margin-bottom: 5px;
+}
+
+.order-details button {
+    background-color: #000;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-.close:hover,
-.close:focus {
-    color: red; /* Color al pasar el mouse o al enfocar */
-    text-decoration: none;
-    cursor: pointer;
+.order-details button:hover {
+    background-color: #333;
+}
+
+.save-button {
+    margin-top: 15px; /* Espacio entre el botón y los elementos de entrada */
+}
+
+label {
+    color: #000; /* Color del texto de las etiquetas en negro */
+    display: block; /* Asegura que el label ocupe toda la línea */
+    margin-bottom: 5px; /* Espacio entre el label y el input */
+}
+  
+.form-container div {
+    margin-bottom: 15px; /* Espacio entre los elementos de entrada */
+}
+
+.form-title, .list-title {
+    color: #000; /* Texto en negro */
 }

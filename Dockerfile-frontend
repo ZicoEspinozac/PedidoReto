@@ -18,4 +18,6 @@ RUN npm run build
 
 # Usar una imagen base de Nginx para servir la aplicación
 FROM nginx:alpine
-COPY --from=build /app/dist/tu-nombre-de-aplicacion /usr/share/nginx/html
+
+# Copiar el contenido de la carpeta dist/pedido-reto al directorio de Nginx
+COPY --from=build /app/dist/pedido-reto /usr/share/nginx/html

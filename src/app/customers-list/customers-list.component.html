@@ -1,35 +1,49 @@
 <div class="container">
-  <div class="form-container">
-    <h2>Crear Cliente</h2>
-    <form [formGroup]="customerForm" (ngSubmit)="guardarCustomers()">
-      <div>
-        <label for="name">Nombre:</label>
-        <input id="name" formControlName="name" type="text" />
-      </div>
-      <div>
-        <label for="email">Email:</label>
-        <input id="email" formControlName="email" type="email" />
-      </div>
-      <div>
-        <label for="address">Dirección:</label>
-        <input id="address" formControlName="address" type="text" />
-      </div>
-      <button type="submit">Crear Cliente</button>
-    </form>
+  <header>
+    <h1>Clientes</h1>
+    <button class="create-button" (click)="toggleCustomerFormVisibility()">Crear Nuevo</button>
+  </header>
+  <main>
+    <div class="form-container" *ngIf="showCustomerForm">
+      <h2 class="form-title">Crear Cliente</h2>
+      <form [formGroup]="customerForm" (ngSubmit)="guardarCustomers()">
+        <div>
+          <label for="name">Nombre:</label>
+          <input id="name" formControlName="name" type="text" class="form-input" />
+        </div>
+        <div>
+          <label for="email">Email:</label>
+          <input id="email" formControlName="email" type="email" class="form-input" />
+        </div>
+        <div>
+          <label for="address">Dirección:</label>
+          <input id="address" formControlName="address" type="text" class="form-input" />
+        </div>
+        <button type="submit" class="save-button">{{ isEditing ? 'Editar Cliente' : 'Guardar Cliente' }}</button>
+        <button type="button" class="cancel-button" (click)="showCustomerForm = false">Cancelar</button>
+      </form>
+    </div>
+    <h2 class="list-title">Lista de Clientes</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Dirección</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of customers">
+          <td>{{item.name}}</td>
+          <td>{{item.email}}</td>
+          <td>{{item.address}}</td>
+          <td>
+            <button (click)="editar(item)" class="editar-button">Editar</button>
+            <button (click)="deleteCustomer(item.id)" class="delete-button">Borrar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
 </div>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Nombre</th>
-      <th>Email</th>
-      <th>Dirección</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let item of customers">
-      <td>{{item.name}}</td>
-      <td>{{item.email}}</td>
-      <td>{{item.address}}</td>
-    </tr>
-  </tbody>
-</table>

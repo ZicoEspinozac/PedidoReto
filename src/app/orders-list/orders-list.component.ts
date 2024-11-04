@@ -31,6 +31,7 @@ export class OrdersListComponent implements OnInit {
     private productsService: ProductsService
   ) {
     this.orderForm = this.fb.group({
+      id: [''],
       customer: ['', Validators.required],
       productId: ['', Validators.required],
       quantity: [1, [Validators.required, Validators.min(1)]], // Mínimo 1
@@ -47,11 +48,13 @@ export class OrdersListComponent implements OnInit {
   private loadOrders() {
     this.ordersService.getOrders().subscribe({
       next: (orders) => {
-        console.log('Órdenes cargadas:', orders);
-        this.orders = orders;
+        this.orders = orders.map(order => ({
+          ...order,
+          totalPrice: order.products.reduce((total, product) => total + (product.price * product.stock), 0)
+        }));
       },
       error: (error) => {
-        console.error('Error al cargar órdenes', error);
+        console.error('Error al cargar las órdenes', error);
       }
     });
   }
@@ -78,85 +81,89 @@ export class OrdersListComponent implements OnInit {
     });
   }
 
-  editOrderData(orderId: string | undefined) {
-    if (!orderId) {
-        console.error('ID de orden no proporcionado.');
-        return;
-    }
 
-    console.log('ID de orden a editar:', orderId); // Línea de log para verificar el ID de orden
-
-    this.ordersService.getOrderById(orderId).subscribe({
-        next: (order) => {
-            console.log('Datos de la orden a editar:', order); // Línea de log para verificar los datos de la orden
-
-            // Cargar los datos de la orden en el formulario
-            this.orderForm.patchValue({
-              customer: order.customerId, // Esto sigue siendo el ID
-              productId: order.products[0].id,
-              quantity: order.quantity,
-              status: order.status
-          });
-            this.selectedOrder = order; // Almacenar la orden seleccionada para futuras referencias
-            this.showOrderForm = true; // Mostrar el formulario de edición
-        },
-        error: (error) => {
-            console.error('Error al cargar los datos de la orden', error);
-        }
-    });
-}
-
-public saveOrder() {
-  if (this.orderForm.invalid) {
+  public saveOrder(): void {
+    if (this.orderForm.invalid) {
       console.error('Formulario inválido');
       return;
-  }
-
-  // Extraer los valores del formulario
-  const { customer, productId, quantity, status } = this.orderForm.value;
-
-  // Buscar el cliente y el producto seleccionados en sus respectivas listas
-  const selectedCustomer = this.customers.find(c => c.id === customer);
-  const selectedProduct = this.products.find(p => p.id === productId);
-
-  if (!selectedCustomer || !selectedProduct) {
+    }
+  
+    // Extraer los valores del formulario
+    const { id, customer, productId, quantity, status } = this.orderForm.value;
+  
+    // Buscar el cliente y el producto seleccionados en sus respectivas listas
+    const selectedCustomer = this.customers.find(c => c.id === customer);
+    const selectedProduct = this.products.find(p => p.id === productId);
+  
+    if (!selectedCustomer || !selectedProduct) {
       console.error('Producto o cliente no encontrado');
       return;
-  }
-
-  // Calcular el precio total
-  const totalPrice = selectedProduct.price * quantity;
-
-  // Crear el objeto de nueva orden sin 'id', porque será generado en el backend
-  const newOrder: Omit<Order, 'id'> = {
-    customerId: selectedCustomer.id,
-    customer: selectedCustomer.name,
-    price: totalPrice,
-    quantity: quantity, // Aquí también se usa quantity
-    status: status,
-    products: [{
-      id: selectedProduct.id,
-      name: selectedProduct.name,
-      price: selectedProduct.price,
-      stock: quantity // Usa quantity aquí si corresponde
-    }]
-  };
-
-  console.log('Datos de la orden:', newOrder);
-
-  // Llamada al servicio para crear la orden
-  this.ordersService.createOrder(newOrder).subscribe({
-      next: (order) => {
-          console.log('Orden creada', order);
-          this.loadOrders();
+    }
+  
+    // Calcular el precio total
+    const totalPrice = selectedProduct.price * quantity;
+  
+    // Crear el objeto de orden
+    const orderData: Omit<Order, 'id'> = {
+      customerId: selectedCustomer.id,
+      customer: selectedCustomer.name,
+      price: totalPrice,
+      quantity: quantity,
+      status: status,
+      products: [{
+        id: selectedProduct.id,
+        name: selectedProduct.name,
+        price: selectedProduct.price,
+        stock: quantity
+      }],
+      totalPrice: totalPrice
+    };
+  
+    if (this.selectedOrder && this.selectedOrder.id) {
+      // Actualizar orden existente
+      this.ordersService.updateOrder(this.selectedOrder.id, { ...orderData, id: this.selectedOrder.id }).subscribe({
+        next: () => {
+          console.log('Orden actualizada', orderData);
+          this.loadOrders(); // Recargar las órdenes después de actualizar
           this.orderForm.reset();
           this.showOrderForm = false;
-      },
-      error: (error) => {
+          this.selectedOrder = null;
+        },
+        error: (error) => {
+          console.error('Error al actualizar la orden', error);
+        }
+      });
+    } else {
+      // Crear nueva orden
+      this.ordersService.createOrder(orderData).subscribe({
+        next: (order) => {
+          console.log('Orden creada', order);
+          this.loadOrders(); // Recargar las órdenes después de crear
+          this.orderForm.reset();
+          this.showOrderForm = false;
+        },
+        error: (error) => {
           console.error('Error al crear la orden', error);
-      }
-  });
-}
+        }
+      });
+    }
+  }
+
+  public editar(order: Order): void {
+    if (order && order.id) {
+      this.orderForm.setValue({
+        id: order.id,
+        customer: order.customer,
+        productId: order.products[0].id,
+        quantity: order.quantity,
+        status: order.status
+      });
+      this.showOrderForm = true;
+      this.selectedOrder = order;
+    } else {
+      console.error('Orden no válida o ID de la orden es undefined');
+    }
+  }
 
   public deleteOrder(id?: string) {
     if (id) {
@@ -188,7 +195,8 @@ public saveOrder() {
 
   // Método para abrir los detalles de la orden
   public openOrderDetails(order: Order): void {
-    this.selectedOrder = order;
+    const totalPrice = order.products.reduce((total, product) => total + (product.price * product.stock), 0);
+    this.selectedOrder = { ...order, totalPrice };
   }
 
   // Método para cerrar los detalles de la orden
