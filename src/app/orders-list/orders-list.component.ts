@@ -23,6 +23,7 @@ export class OrdersListComponent implements OnInit {
   selectedOrder: Order | null = null; // Para mostrar detalles de la orden seleccionada
   orderStatuses: string[] = ['NEW', 'PROCESSING', 'COMPLETED'];
   searchQuery: string = ''; // Variable para búsqueda
+  isEditing: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -128,6 +129,7 @@ export class OrdersListComponent implements OnInit {
           this.orderForm.reset();
           this.showOrderForm = false;
           this.selectedOrder = null;
+          this.isEditing = false;
         },
         error: (error) => {
           console.error('Error al actualizar la orden', error);
@@ -160,6 +162,7 @@ export class OrdersListComponent implements OnInit {
       });
       this.showOrderForm = true;
       this.selectedOrder = order;
+      this.isEditing = true;
     } else {
       console.error('Orden no válida o ID de la orden es undefined');
     }

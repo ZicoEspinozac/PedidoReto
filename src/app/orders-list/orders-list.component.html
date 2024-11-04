@@ -4,7 +4,7 @@
 </header>
 <main>
   <div class="form-container" *ngIf="showOrderForm">
-    <h2 class="form-title">Crear Orden</h2>
+    <h2 class="form-title">{{ isEditing ? 'Actualizar Orden' : 'Crear Orden' }}</h2>
     <form [formGroup]="orderForm" (ngSubmit)="saveOrder()">
       <input type="hidden" formControlName="id">
       <div>
@@ -29,10 +29,25 @@
           <option *ngFor="let status of orderStatuses" [ngValue]="status">{{ status }}</option>
         </select>
       </div>
-      <button type="submit" class="save-button">Guardar Orden</button>
+      <button type="submit" class="save-button">{{ isEditing ? 'Actualizar Orden' : 'Guardar Orden' }}</button>
       <button type="button" class="cancel-button" (click)="showOrderForm = false">Cancelar</button>
     </form>
   </div>
+
+  <div *ngIf="selectedOrder" class="order-details">
+    <h2>Detalles de la Orden</h2>
+    <p><strong>Cliente:</strong> {{ selectedOrder.customer }}</p>
+    <p><strong>Estado:</strong> {{ selectedOrder.status }}</p>
+    <p><strong>Total:</strong> {{ selectedOrder.totalPrice | currency }}</p>
+    <h3>Productos</h3>
+    <ul>
+      <li *ngFor="let product of selectedOrder.products">
+        {{ product.name }} - {{ product.price | currency }} x {{ product.stock }}
+      </li>
+    </ul>
+    <button (click)="closeOrderDetails()">Cerrar</button>
+  </div>
+
   <h2 class="list-title">Lista de Órdenes</h2>
   <table class="table">
     <thead>
